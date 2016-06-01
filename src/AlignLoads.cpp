@@ -29,10 +29,17 @@ private:
     // Alignment info for variables in scope.
     Scope<ModulusRemainder> alignment_info;
 
+    // Keep track of allocations we modify the loads of, so we can
+    // align the extents.
+    Scope<bool> buffers_to_align;
+
     using IRMutator::visit;
 
     // Rewrite a load to have a new index, updating the type if necessary.
     Expr make_load(const Load *load, Expr index) {
+        if (buffers_to_align.contains(load->name)) {
+            buffers_to_align.ref(load->name) = true;
+        }
         return mutate(Load::make(load->type.with_lanes(index.type().lanes()), load->name,
                                  index, load->image, load->param));
     }
@@ -138,6 +145,34 @@ private:
             return;
         }
         IRMutator::visit(op);
+    }
+
+    void visit(const Allocate *op) {
+        // This pass causes pipelines to access up to one vector past
+        // the end of an allocation. To avoid issues due to invalid
+        // accesses, we align the allocations that are modified by
+        // this pass.
+        buffers_to_align.push(op->name, false);
+        IRMutator::visit(op);
+        bool align = buffers_to_align.get(op->name);
+        buffers_to_align.pop(op->name);
+
+        if (align) {
+            // The allocation changed, we need to align this allocation.
+            op = stmt.as<Allocate>();
+
+            // In order to align it, we need to flatten it first.
+            Expr extent = 1;
+            for (Expr i : op->extents) {
+                extent *= i;
+            }
+
+            // Align the flattened extent.
+            int type_align = required_alignment / op->type.bytes();
+            extent = ((extent + type_align - 1) / type_align) * type_align;
+            stmt = Allocate::make(op->name, op->type, {extent}, op->condition, op->body,
+                                  op->new_expr, op->free_function);
+        }
     }
 
     template<typename NodeType, typename LetType>
