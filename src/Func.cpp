@@ -2082,7 +2082,7 @@ FuncRefVar::operator Expr() const {
     return Call::make(func, expr_args);
 }
 
-Expr FuncRefVar::operator[](int i) const {
+FuncTupleElementRef<FuncRefVar> FuncRefVar::operator[](int i) const {
     user_assert(func.has_pure_definition() || func.has_extern_definition())
         << "Can't call Func \"" << func.name() << "\" because it has not yet been defined.\n";
 
@@ -2095,7 +2095,7 @@ Expr FuncRefVar::operator[](int i) const {
     for (size_t j = 0; j < expr_args.size(); j++) {
         expr_args[j] = Var(args[j]);
     }
-    return Call::make(func, expr_args, i);
+    return FuncTupleElementRef<FuncRefVar>(*this, expr_args, i);
 }
 
 size_t FuncRefVar::size() const {
@@ -2257,7 +2257,7 @@ FuncRefExpr::operator Expr() const {
     return Call::make(func, args);
 }
 
-Expr FuncRefExpr::operator[](int i) const {
+FuncTupleElementRef<FuncRefExpr> FuncRefExpr::operator[](int i) const {
     user_assert(func.has_pure_definition() || func.has_extern_definition())
         << "Can't call Func \"" << func.name() << "\" because it has not yet been defined.\n";
 
@@ -2268,7 +2268,7 @@ Expr FuncRefExpr::operator[](int i) const {
     user_assert(i >= 0 && i < func.outputs())
         << "Tuple index out of range in reference to Func \"" << func.name() << "\".\n";
 
-    return Call::make(func, args, i);
+    return FuncTupleElementRef<FuncRefExpr>(*this, args, i);
 }
 
 size_t FuncRefExpr::size() const {
