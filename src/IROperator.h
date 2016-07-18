@@ -10,7 +10,6 @@
 #include <atomic>
 
 #include "IR.h"
-#include "Undef.h"
 
 namespace Halide {
 
@@ -56,6 +55,9 @@ EXPORT bool is_negative_const(Expr e);
  * used when the value will be negated as part of simplification.)
  */
 EXPORT bool is_negative_negatable_const(Expr e);
+
+/** Is the expression an undef */
+EXPORT bool is_undef(Expr e);
 
 /** Is the expression a const (as defined by is_const), and also equal
  * to zero (in all lanes, if a vector expression) */
@@ -1813,6 +1815,13 @@ inline NO_INLINE Expr print_when(Expr condition, Expr a, Args... args) {
 
 // @}
 
+/** Represent an undef value of given type. */
+struct Undef {
+    Type type;
+
+    Undef(Type t) : type(t) {}
+    Undef() {}
+};
 
 /** Return an undef value of the given type. Halide skips stores that
  * depend on undef values, so you can use this to mean "do not modify

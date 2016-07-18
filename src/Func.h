@@ -16,7 +16,6 @@
 #include "JITModule.h"
 #include "Image.h"
 #include "Target.h"
-#include "Undef.h"
 #include "Tuple.h"
 #include "Module.h"
 #include "Pipeline.h"
@@ -259,7 +258,7 @@ public:
     EXPORT Stage operator=(Expr);
 
     /**  Use this as the left-hand-side of a definition with undefined value. */
-    EXPORT Stage operator=(Undef);
+    EXPORT Stage operator=(const Undef &);
 
     /** Use this as the left-hand-side of a definition for a Func with
      * multiple outputs. */
@@ -364,7 +363,7 @@ public:
      * \ref RDom) with undefined value. The function must already
      * have a pure definition.
      */
-    EXPORT Stage operator=(Undef);
+    EXPORT Stage operator=(const Undef &);
 
     /** Use this as the left-hand-side of an update definition for a
      * Func with multiple outputs. */

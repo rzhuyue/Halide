@@ -2017,14 +2017,14 @@ vector<string> FuncRefVar::args_with_implicit_vars(const vector<Expr> &e) const 
 }
 
 Stage FuncRefVar::operator=(Expr e) {
-    return (*this) = Tuple({e});
+    return (*this) = Tuple(e);
 }
 
-Stage FuncRefVar::operator=(Undef u) {
-    Expr expr = Call::make(u.type(), Call::undef,
+Stage FuncRefVar::operator=(const Undef &u) {
+    Expr expr = Call::make(u.type, Call::undef,
                            vector<Expr>(),
                            Call::PureIntrinsic);
-    return (*this) = Tuple({expr});
+    return (*this) = Tuple(expr);
 }
 
 Stage FuncRefVar::operator=(const Tuple &e) {
@@ -2235,7 +2235,14 @@ vector<Expr> FuncRefExpr::args_with_implicit_vars(const vector<Expr> &e) const {
 }
 
 Stage FuncRefExpr::operator=(Expr e) {
-    return (*this) = Tuple({e});
+    return (*this) = Tuple(e);
+}
+
+Stage FuncRefExpr::operator=(const Undef &u) {
+    Expr expr = Call::make(u.type, Call::undef,
+                           vector<Expr>(),
+                           Call::PureIntrinsic);
+    return (*this) = Tuple(expr);
 }
 
 Stage FuncRefExpr::operator=(const Tuple &e) {
@@ -2290,7 +2297,7 @@ void define_base_case(Internal::Function func, const vector<Expr> &a, const Tupl
 }
 
 void define_base_case(Internal::Function func, const vector<Expr> &a, Expr e) {
-    define_base_case(func, a, Tuple({e}));
+    define_base_case(func, a, Tuple(e));
 }
 
 Stage FuncRefExpr::operator+=(Expr e) {
@@ -2300,11 +2307,11 @@ Stage FuncRefExpr::operator+=(Expr e) {
 }
 
 Stage FuncRefExpr::operator+=(const FuncRefVar &e) {
-    return (*this) += (Expr) e;
+    return (*this) += (Expr)e;
 }
 
 Stage FuncRefExpr::operator+=(const FuncRefExpr &e) {
-    return (*this) += (Expr) e;
+    return (*this) += (Expr)e;
 }
 
 Stage FuncRefExpr::operator+=(const Tuple &e) {
@@ -2333,11 +2340,11 @@ Stage FuncRefExpr::operator*=(Expr e) {
 }
 
 Stage FuncRefExpr::operator*=(const FuncRefVar &e) {
-    return (*this) *= (Expr) e;
+    return (*this) *= (Expr)e;
 }
 
 Stage FuncRefExpr::operator*=(const FuncRefExpr &e) {
-    return (*this) *= (Expr) e;
+    return (*this) *= (Expr)e;
 }
 
 Stage FuncRefExpr::operator*=(const Tuple &e) {
@@ -2366,11 +2373,11 @@ Stage FuncRefExpr::operator-=(Expr e) {
 }
 
 Stage FuncRefExpr::operator-=(const FuncRefVar &e) {
-    return (*this) -= (Expr) e;
+    return (*this) -= (Expr)e;
 }
 
 Stage FuncRefExpr::operator-=(const FuncRefExpr &e) {
-    return (*this) -= (Expr) e;
+    return (*this) -= (Expr)e;
 }
 
 Stage FuncRefExpr::operator-=(const Tuple &e) {
@@ -2399,11 +2406,11 @@ Stage FuncRefExpr::operator/=(Expr e) {
 }
 
 Stage FuncRefExpr::operator/=(const FuncRefVar &e) {
-    return (*this) /= (Expr) e;
+    return (*this) /= (Expr)e;
 }
 
 Stage FuncRefExpr::operator/=(const FuncRefExpr &e) {
-    return (*this) /= (Expr) e;
+    return (*this) /= (Expr)e;
 }
 
 Stage FuncRefExpr::operator/=(const Tuple &e) {

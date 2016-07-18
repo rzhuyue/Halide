@@ -155,13 +155,20 @@ int main(int argc, char **argv) {
         // if statement instead of a select.
         Func f;
         Var x, y;
-        f(x, y) = select(2*x < y, 5, undef<int>());
 
-        Var xi, yi;
-        f.tile(x, y, xi, yi, 4, 4);
+        f(x, y) = undef<int32_t>();
+
+        Param<int> width("width");
+        Param<int> height("height");
+        RDom r(0, width, 0, height);
+        r.where(2*r.x < r.y);
+        f(r.x, r.y) = 5;
+
+        RVar rxi, ryi;
+        f.update().tile(r.x, r.y, rxi, ryi, 4, 4);
 
         // Check there are no if statements.
-        Module m = f.compile_to_module({});
+        Module m = f.compile_to_module({width, height});
         CountConditionals s;
         m.functions().front().body.accept(&s);
         if (s.count != 0) {
@@ -185,7 +192,8 @@ int main(int argc, char **argv) {
         f(x, y) = x + y;
 
         RDom r(0, 100, 0, 100);
-        f(r.x, r.y) += select((r.x < r.y) && (r.x == 10), 3, undef<int>());
+        r.where((r.x < r.y) && (r.x == 10));
+        f(r.x, r.y) += 3;
 
         f.update(0).gpu_tile(r.x, r.y, 4, 4);
 

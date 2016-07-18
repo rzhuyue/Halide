@@ -8,13 +8,33 @@
 
 #include "IR.h"
 #include "IROperator.h"
-#include "Undef.h"
 #include "Util.h"
 
 namespace Halide {
 
 class FuncRefVar;
 class FuncRefExpr;
+
+/** A class that can represent Exprs or Undefs. Used for Tuple's values
+ * which can accept a mix of either. */
+struct ExprOrUndef {
+    ExprOrUndef() : expr(Expr()), is_undef(false) {}
+    ExprOrUndef(Expr e) : expr(e), is_undef(false) {}
+    ExprOrUndef(const Undef &u) : undef(u), is_undef(true) {}
+
+    Expr expr;
+    Undef undef;
+    bool is_undef;
+
+    operator Expr() const {
+        if (is_undef) {
+            return expr;
+        }
+        return Internal::Call::make(undef.type, Internal::Call::undef,
+                                    std::vector<Expr>(),
+                                    Internal::Call::PureIntrinsic);
+    }
+};
 
 /** Create a small array of Exprs for defining and calling functions
  * with multiple outputs. */
@@ -37,6 +57,21 @@ public:
         return exprs[x];
     }
 
+    /** Construct a Tuple of a single Expr */
+    Tuple(Expr e) {
+        exprs.push_back(e);
+    }
+
+    /** Construct a Tuple from mixed of Exprs and Undefs. */
+    //@{
+    template<typename ...Args>
+    Tuple(ExprOrUndef a, ExprOrUndef b, Args... args) {
+        exprs.push_back(a);
+        exprs.push_back(b);
+        Internal::collect_args(exprs, args...);
+    }
+    //@}
+
     /** Construct a Tuple from some Exprs. */
     //@{
     template<typename ...Args>
@@ -47,8 +82,17 @@ public:
     }
     //@}
 
+    /** Construct a Tuple from a vector of Exprs and Undefs */
+    explicit NO_INLINE Tuple(const std::vector<ExprOrUndef> &e) {
+        user_assert(e.size() > 0) << "Tuples must have at least one element\n";
+        exprs.resize(e.size());
+        for (size_t i = 0; i < e.size(); ++i) {
+            exprs[i] = (Expr)e[i];
+        }
+    }
+
     /** Construct a Tuple from a vector of Exprs */
-    explicit NO_INLINE Tuple(const std::vector<Expr> &e) : exprs(e) {
+    NO_INLINE Tuple(const std::vector<Expr> &e) : exprs(e) {
         user_assert(e.size() > 0) << "Tuples must have at least one element\n";
     }
 
