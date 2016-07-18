@@ -377,6 +377,7 @@ SOURCE_FILES = \
   TrimNoOps.cpp \
   Tuple.cpp \
   Type.cpp \
+  Undef.cpp \
   UnifyDuplicateLets.cpp \
   UniquifyVariableNames.cpp \
   UnrollLoops.cpp \
@@ -518,6 +519,7 @@ HEADER_FILES = \
   TrimNoOps.h \
   Tuple.h \
   Type.h \
+  Undef.h \
   UnifyDuplicateLets.h \
   UniquifyVariableNames.h \
   UnrollLoops.h \

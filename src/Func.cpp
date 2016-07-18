@@ -2020,6 +2020,13 @@ Stage FuncRefVar::operator=(Expr e) {
     return (*this) = Tuple({e});
 }
 
+Stage FuncRefVar::operator=(Undef u) {
+    Expr expr = Call::make(u.type(), Call::undef,
+                           vector<Expr>(),
+                           Call::PureIntrinsic);
+    return (*this) = Tuple({expr});
+}
+
 Stage FuncRefVar::operator=(const Tuple &e) {
     // If the function has already been defined, this must actually be an update
     if (func.has_pure_definition()) {
@@ -2054,7 +2061,37 @@ Stage FuncRefVar::operator+=(Expr e) {
     return FuncRefExpr(func, args) += e;
 }
 
+Stage FuncRefVar::operator+=(const FuncRefVar &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) += e;
+}
+
+Stage FuncRefVar::operator+=(const FuncRefExpr &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) += e;
+}
+
+Stage FuncRefVar::operator+=(const Tuple &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) += e;
+}
+
 Stage FuncRefVar::operator*=(Expr e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) *= e;
+}
+
+Stage FuncRefVar::operator*=(const FuncRefVar &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) *= e;
+}
+
+Stage FuncRefVar::operator*=(const FuncRefExpr &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) *= e;
+}
+
+Stage FuncRefVar::operator*=(const Tuple &e) {
     // This is actually an update
     return FuncRefExpr(func, args) *= e;
 }
@@ -2064,7 +2101,37 @@ Stage FuncRefVar::operator-=(Expr e) {
     return FuncRefExpr(func, args) -= e;
 }
 
+Stage FuncRefVar::operator-=(const FuncRefVar &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) -= e;
+}
+
+Stage FuncRefVar::operator-=(const FuncRefExpr &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) -= e;
+}
+
+Stage FuncRefVar::operator-=(const Tuple &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) -= e;
+}
+
 Stage FuncRefVar::operator/=(Expr e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) /= e;
+}
+
+Stage FuncRefVar::operator/=(const FuncRefVar &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) /= e;
+}
+
+Stage FuncRefVar::operator/=(const FuncRefExpr &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) /= e;
+}
+
+Stage FuncRefVar::operator/=(const Tuple &e) {
     // This is actually an update
     return FuncRefExpr(func, args) /= e;
 }
@@ -2204,7 +2271,7 @@ Stage FuncRefExpr::operator=(const FuncRefVar &e) {
 
 // Inject a suitable base-case definition given an update
 // definition. This is a helper for FuncRefExpr::operator+= and co.
-void define_base_case(Internal::Function func, const vector<Expr> &a, Expr e) {
+void define_base_case(Internal::Function func, const vector<Expr> &a, const Tuple &e) {
     if (func.has_pure_definition()) return;
     vector<Var> pure_args(a.size());
 
@@ -2222,10 +2289,41 @@ void define_base_case(Internal::Function func, const vector<Expr> &a, Expr e) {
     FuncRefVar(func, pure_args) = e;
 }
 
+void define_base_case(Internal::Function func, const vector<Expr> &a, Expr e) {
+    define_base_case(func, a, Tuple({e}));
+}
+
 Stage FuncRefExpr::operator+=(Expr e) {
     vector<Expr> a = args_with_implicit_vars({e});
     define_base_case(func, a, cast(e.type(), 0));
     return (*this) = Expr(*this) + e;
+}
+
+Stage FuncRefExpr::operator+=(const FuncRefVar &e) {
+    return (*this) += (Expr) e;
+}
+
+Stage FuncRefExpr::operator+=(const FuncRefExpr &e) {
+    return (*this) += (Expr) e;
+}
+
+Stage FuncRefExpr::operator+=(const Tuple &e) {
+    if (e.size() == 1) {
+        return (*this) += e[0];
+    }
+
+    vector<Expr> init_values(e.size());
+    for (int i = 0; i < (int)init_values.size(); ++i) {
+        init_values[i] = cast(e[i].type(), 0);
+    }
+    vector<Expr> a = args_with_implicit_vars(e.as_vector());
+    define_base_case(func, a, Tuple(init_values));
+
+    vector<Expr> values(e.size());
+    for (int i = 0; i < (int)values.size(); ++i) {
+        values[i] = (*this)[i] + e[i];
+    }
+    return (*this) = Tuple(values);
 }
 
 Stage FuncRefExpr::operator*=(Expr e) {
@@ -2234,16 +2332,97 @@ Stage FuncRefExpr::operator*=(Expr e) {
     return (*this) = Expr(*this) * e;
 }
 
+Stage FuncRefExpr::operator*=(const FuncRefVar &e) {
+    return (*this) *= (Expr) e;
+}
+
+Stage FuncRefExpr::operator*=(const FuncRefExpr &e) {
+    return (*this) *= (Expr) e;
+}
+
+Stage FuncRefExpr::operator*=(const Tuple &e) {
+    if (e.size() == 1) {
+        return (*this) *= e[0];
+    }
+
+    vector<Expr> init_values(e.size());
+    for (int i = 0; i < (int)init_values.size(); ++i) {
+        init_values[i] = cast(e[i].type(), 1);
+    }
+    vector<Expr> a = args_with_implicit_vars(e.as_vector());
+    define_base_case(func, a, Tuple(init_values));
+
+    vector<Expr> values(e.size());
+    for (int i = 0; i < (int)values.size(); ++i) {
+        values[i] = (*this)[i] * e[i];
+    }
+    return (*this) = Tuple(values);
+}
+
 Stage FuncRefExpr::operator-=(Expr e) {
     vector<Expr> a = args_with_implicit_vars({e});
     define_base_case(func, a, cast(e.type(), 0));
     return (*this) = Expr(*this) - e;
 }
 
+Stage FuncRefExpr::operator-=(const FuncRefVar &e) {
+    return (*this) -= (Expr) e;
+}
+
+Stage FuncRefExpr::operator-=(const FuncRefExpr &e) {
+    return (*this) -= (Expr) e;
+}
+
+Stage FuncRefExpr::operator-=(const Tuple &e) {
+    if (e.size() == 1) {
+        return (*this) -= e[0];
+    }
+
+    vector<Expr> init_values(e.size());
+    for (int i = 0; i < (int)init_values.size(); ++i) {
+        init_values[i] = cast(e[i].type(), 0);
+    }
+    vector<Expr> a = args_with_implicit_vars(e.as_vector());
+    define_base_case(func, a, Tuple(init_values));
+
+    vector<Expr> values(e.size());
+    for (int i = 0; i < (int)values.size(); ++i) {
+        values[i] = (*this)[i] - e[i];
+    }
+    return (*this) = Tuple(values);
+}
+
 Stage FuncRefExpr::operator/=(Expr e) {
     vector<Expr> a = args_with_implicit_vars({e});
     define_base_case(func, a, cast(e.type(), 1));
     return (*this) = Expr(*this) / e;
+}
+
+Stage FuncRefExpr::operator/=(const FuncRefVar &e) {
+    return (*this) /= (Expr) e;
+}
+
+Stage FuncRefExpr::operator/=(const FuncRefExpr &e) {
+    return (*this) /= (Expr) e;
+}
+
+Stage FuncRefExpr::operator/=(const Tuple &e) {
+    if (e.size() == 1) {
+        return (*this) /= e[0];
+    }
+
+    vector<Expr> init_values(e.size());
+    for (int i = 0; i < (int)init_values.size(); ++i) {
+        init_values[i] = cast(e[i].type(), 1);
+    }
+    vector<Expr> a = args_with_implicit_vars(e.as_vector());
+    define_base_case(func, a, Tuple(init_values));
+
+    vector<Expr> values(e.size());
+    for (int i = 0; i < (int)values.size(); ++i) {
+        values[i] = (*this)[i] / e[i];
+    }
+    return (*this) = Tuple(values);
 }
 
 FuncRefExpr::operator Expr() const {

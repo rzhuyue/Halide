@@ -10,6 +10,7 @@
 #include <atomic>
 
 #include "IR.h"
+#include "Undef.h"
 
 namespace Halide {
 
@@ -1831,14 +1832,12 @@ inline NO_INLINE Expr print_when(Expr condition, Expr a, Args... args) {
  * Use this feature with great caution, as you can use it to load from
  * uninitialized memory.
  */
-inline Expr undef(Type t) {
-    return Internal::Call::make(t, Internal::Call::undef,
-                                std::vector<Expr>(),
-                                Internal::Call::PureIntrinsic);
+inline Undef undef(Type t) {
+    return Undef(t);
 }
 
 template<typename T>
-inline Expr undef() {
+inline Undef undef() {
     return undef(type_of<T>());
 }
 

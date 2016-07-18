@@ -16,6 +16,7 @@
 #include "JITModule.h"
 #include "Image.h"
 #include "Target.h"
+#include "Undef.h"
 #include "Tuple.h"
 #include "Module.h"
 #include "Pipeline.h"
@@ -257,6 +258,9 @@ public:
     /**  Use this as the left-hand-side of a definition. */
     EXPORT Stage operator=(Expr);
 
+    /**  Use this as the left-hand-side of a definition with undefined value. */
+    EXPORT Stage operator=(Undef);
+
     /** Use this as the left-hand-side of a definition for a Func with
      * multiple outputs. */
     EXPORT Stage operator=(const Tuple &);
@@ -266,28 +270,48 @@ public:
      * over. If the function does not already have a pure definition,
      * this sets it to zero.
      */
+    // @{
     EXPORT Stage operator+=(Expr);
+    EXPORT Stage operator+=(const FuncRefVar &e);
+    EXPORT Stage operator+=(const FuncRefExpr &e);
+    EXPORT Stage operator+=(const Tuple &);
+    // @}
 
     /** Define this function as a sum reduction over the negative of
      * the given expression. The expression should refer to some RDom
      * to sum over. If the function does not already have a pure
      * definition, this sets it to zero.
      */
+    // @{
     EXPORT Stage operator-=(Expr);
+    EXPORT Stage operator-=(const FuncRefVar &e);
+    EXPORT Stage operator-=(const FuncRefExpr &e);
+    EXPORT Stage operator-=(const Tuple &);
+    // @}
 
     /** Define this function as a product reduction. The expression
      * should refer to some RDom to take the product over. If the
      * function does not already have a pure definition, this sets it
      * to 1.
      */
+    // @{
     EXPORT Stage operator*=(Expr);
+    EXPORT Stage operator*=(const FuncRefVar &e);
+    EXPORT Stage operator*=(const FuncRefExpr &e);
+    EXPORT Stage operator*=(const Tuple &);
+    // @}
 
     /** Define this function as the product reduction over the inverse
      * of the expression. The expression should refer to some RDom to
      * take the product over. If the function does not already have a
      * pure definition, this sets it to 1.
      */
+    // @{
     EXPORT Stage operator/=(Expr);
+    EXPORT Stage operator/=(const FuncRefVar &e);
+    EXPORT Stage operator/=(const FuncRefExpr &e);
+    EXPORT Stage operator/=(const Tuple &);
+    // @}
 
     /** Override the usual assignment operator, so that
      * f(x, y) = g(x, y) defines f.
@@ -336,6 +360,12 @@ public:
      */
     EXPORT Stage operator=(Expr);
 
+    /** Use this as the left-hand-side of an update definition (see
+     * \ref RDom) with undefined value. The function must already
+     * have a pure definition.
+     */
+    EXPORT Stage operator=(Undef);
+
     /** Use this as the left-hand-side of an update definition for a
      * Func with multiple outputs. */
     EXPORT Stage operator=(const Tuple &);
@@ -345,28 +375,48 @@ public:
      * over. If the function does not already have a pure definition,
      * this sets it to zero.
      */
+    // @{
     EXPORT Stage operator+=(Expr);
+    EXPORT Stage operator+=(const FuncRefVar &);
+    EXPORT Stage operator+=(const FuncRefExpr &);
+    EXPORT Stage operator+=(const Tuple &);
+    // @}
 
     /** Define this function as a sum reduction over the negative of
      * the given expression. The expression should refer to some RDom
      * to sum over. If the function does not already have a pure
      * definition, this sets it to zero.
      */
+    // @{
     EXPORT Stage operator-=(Expr);
+    EXPORT Stage operator-=(const FuncRefVar &);
+    EXPORT Stage operator-=(const FuncRefExpr &);
+    EXPORT Stage operator-=(const Tuple &);
+    // @}
 
     /** Define this function as a product reduction. The expression
      * should refer to some RDom to take the product over. If the
      * function does not already have a pure definition, this sets it
      * to 1.
      */
+    // @{
     EXPORT Stage operator*=(Expr);
+    EXPORT Stage operator*=(const FuncRefVar &);
+    EXPORT Stage operator*=(const FuncRefExpr &);
+    EXPORT Stage operator*=(const Tuple &);
+    // @}
 
     /** Define this function as the product reduction over the inverse
      * of the expression. The expression should refer to some RDom to
      * take the product over. If the function does not already have a
      * pure definition, this sets it to 1.
      */
+    // @{
     EXPORT Stage operator/=(Expr);
+    EXPORT Stage operator/=(const FuncRefVar &);
+    EXPORT Stage operator/=(const FuncRefExpr &);
+    EXPORT Stage operator/=(const Tuple &);
+    // @}
 
     /* Override the usual assignment operator, so that
      * f(x, y) = g(x, y) defines f.

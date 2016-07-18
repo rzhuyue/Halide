@@ -8,6 +8,7 @@
 
 #include "IR.h"
 #include "IROperator.h"
+#include "Undef.h"
 #include "Util.h"
 
 namespace Halide {
