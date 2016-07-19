@@ -27,12 +27,21 @@ struct ExprOrUndef {
     bool is_undef;
 
     operator Expr() const {
-        if (is_undef) {
+        if (!is_undef) {
             return expr;
+        } else {
+            return Internal::Call::make(undef.type, Internal::Call::undef,
+                                        std::vector<Expr>(),
+                                        Internal::Call::PureIntrinsic);
         }
-        return Internal::Call::make(undef.type, Internal::Call::undef,
-                                    std::vector<Expr>(),
-                                    Internal::Call::PureIntrinsic);
+    }
+
+    Type type() const {
+        if (!is_undef) {
+            return expr.type();
+        } else {
+            return undef.type;
+        }
     }
 };
 

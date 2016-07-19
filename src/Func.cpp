@@ -2061,6 +2061,11 @@ Stage FuncRefVar::operator+=(Expr e) {
     return FuncRefExpr(func, args) += e;
 }
 
+Stage FuncRefVar::operator+=(const Undef &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) += e;
+}
+
 Stage FuncRefVar::operator+=(const FuncRefVar &e) {
     // This is actually an update
     return FuncRefExpr(func, args) += e;
@@ -2077,6 +2082,11 @@ Stage FuncRefVar::operator+=(const Tuple &e) {
 }
 
 Stage FuncRefVar::operator*=(Expr e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) *= e;
+}
+
+Stage FuncRefVar::operator*=(const Undef &e) {
     // This is actually an update
     return FuncRefExpr(func, args) *= e;
 }
@@ -2101,6 +2111,11 @@ Stage FuncRefVar::operator-=(Expr e) {
     return FuncRefExpr(func, args) -= e;
 }
 
+Stage FuncRefVar::operator-=(const Undef &e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) -= e;
+}
+
 Stage FuncRefVar::operator-=(const FuncRefVar &e) {
     // This is actually an update
     return FuncRefExpr(func, args) -= e;
@@ -2117,6 +2132,11 @@ Stage FuncRefVar::operator-=(const Tuple &e) {
 }
 
 Stage FuncRefVar::operator/=(Expr e) {
+    // This is actually an update
+    return FuncRefExpr(func, args) /= e;
+}
+
+Stage FuncRefVar::operator/=(const Undef &e) {
     // This is actually an update
     return FuncRefExpr(func, args) /= e;
 }
@@ -2306,6 +2326,13 @@ Stage FuncRefExpr::operator+=(Expr e) {
     return (*this) = Expr(*this) + e;
 }
 
+Stage FuncRefExpr::operator+=(const Undef &u) {
+    Expr e = Call::make(u.type, Call::undef,
+                        vector<Expr>(),
+                        Call::PureIntrinsic);
+    return (*this) += e;
+}
+
 Stage FuncRefExpr::operator+=(const FuncRefVar &e) {
     return (*this) += (Expr)e;
 }
@@ -2337,6 +2364,13 @@ Stage FuncRefExpr::operator*=(Expr e) {
     vector<Expr> a = args_with_implicit_vars({e});
     define_base_case(func, a, cast(e.type(), 1));
     return (*this) = Expr(*this) * e;
+}
+
+Stage FuncRefExpr::operator*=(const Undef &u) {
+    Expr e = Call::make(u.type, Call::undef,
+                        vector<Expr>(),
+                        Call::PureIntrinsic);
+    return (*this) *= e;
 }
 
 Stage FuncRefExpr::operator*=(const FuncRefVar &e) {
@@ -2372,6 +2406,13 @@ Stage FuncRefExpr::operator-=(Expr e) {
     return (*this) = Expr(*this) - e;
 }
 
+Stage FuncRefExpr::operator-=(const Undef &u) {
+    Expr e = Call::make(u.type, Call::undef,
+                        vector<Expr>(),
+                        Call::PureIntrinsic);
+    return (*this) -= e;
+}
+
 Stage FuncRefExpr::operator-=(const FuncRefVar &e) {
     return (*this) -= (Expr)e;
 }
@@ -2403,6 +2444,13 @@ Stage FuncRefExpr::operator/=(Expr e) {
     vector<Expr> a = args_with_implicit_vars({e});
     define_base_case(func, a, cast(e.type(), 1));
     return (*this) = Expr(*this) / e;
+}
+
+Stage FuncRefExpr::operator/=(const Undef &u) {
+    Expr e = Call::make(u.type, Call::undef,
+                        vector<Expr>(),
+                        Call::PureIntrinsic);
+    return (*this) /= e;
 }
 
 Stage FuncRefExpr::operator/=(const FuncRefVar &e) {

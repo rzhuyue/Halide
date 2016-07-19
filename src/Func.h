@@ -271,6 +271,7 @@ public:
      */
     // @{
     EXPORT Stage operator+=(Expr);
+    EXPORT Stage operator+=(const Undef &);
     EXPORT Stage operator+=(const FuncRefVar &e);
     EXPORT Stage operator+=(const FuncRefExpr &e);
     EXPORT Stage operator+=(const Tuple &);
@@ -283,6 +284,7 @@ public:
      */
     // @{
     EXPORT Stage operator-=(Expr);
+    EXPORT Stage operator-=(const Undef &);
     EXPORT Stage operator-=(const FuncRefVar &e);
     EXPORT Stage operator-=(const FuncRefExpr &e);
     EXPORT Stage operator-=(const Tuple &);
@@ -295,6 +297,7 @@ public:
      */
     // @{
     EXPORT Stage operator*=(Expr);
+    EXPORT Stage operator*=(const Undef &);
     EXPORT Stage operator*=(const FuncRefVar &e);
     EXPORT Stage operator*=(const FuncRefExpr &e);
     EXPORT Stage operator*=(const Tuple &);
@@ -307,6 +310,7 @@ public:
      */
     // @{
     EXPORT Stage operator/=(Expr);
+    EXPORT Stage operator/=(const Undef &);
     EXPORT Stage operator/=(const FuncRefVar &e);
     EXPORT Stage operator/=(const FuncRefExpr &e);
     EXPORT Stage operator/=(const Tuple &);
@@ -376,6 +380,7 @@ public:
      */
     // @{
     EXPORT Stage operator+=(Expr);
+    EXPORT Stage operator+=(const Undef &);
     EXPORT Stage operator+=(const FuncRefVar &);
     EXPORT Stage operator+=(const FuncRefExpr &);
     EXPORT Stage operator+=(const Tuple &);
@@ -388,6 +393,7 @@ public:
      */
     // @{
     EXPORT Stage operator-=(Expr);
+    EXPORT Stage operator-=(const Undef &);
     EXPORT Stage operator-=(const FuncRefVar &);
     EXPORT Stage operator-=(const FuncRefExpr &);
     EXPORT Stage operator-=(const Tuple &);
@@ -400,6 +406,7 @@ public:
      */
     // @{
     EXPORT Stage operator*=(Expr);
+    EXPORT Stage operator*=(const Undef &);
     EXPORT Stage operator*=(const FuncRefVar &);
     EXPORT Stage operator*=(const FuncRefExpr &);
     EXPORT Stage operator*=(const Tuple &);
@@ -412,6 +419,7 @@ public:
      */
     // @{
     EXPORT Stage operator/=(Expr);
+    EXPORT Stage operator/=(const Undef &);
     EXPORT Stage operator/=(const FuncRefVar &);
     EXPORT Stage operator/=(const FuncRefExpr &);
     EXPORT Stage operator/=(const Tuple &);
